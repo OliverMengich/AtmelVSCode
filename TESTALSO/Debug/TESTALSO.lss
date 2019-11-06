@@ -3,29 +3,29 @@ TESTALSO.elf:     file format elf32-avr
 
 Sections:
 Idx Name          Size      VMA       LMA       File off  Algn
-  0 .text         0000011a  00000000  00000000  00000054  2**1
+  0 .text         000000fe  00000000  00000000  00000054  2**1
                   CONTENTS, ALLOC, LOAD, READONLY, CODE
-  1 .data         00000000  00800060  00800060  0000016e  2**0
+  1 .data         00000000  00800060  00800060  00000152  2**0
                   CONTENTS, ALLOC, LOAD, DATA
-  2 .comment      00000030  00000000  00000000  0000016e  2**0
+  2 .comment      00000030  00000000  00000000  00000152  2**0
                   CONTENTS, READONLY
-  3 .note.gnu.avr.deviceinfo 0000003c  00000000  00000000  000001a0  2**2
+  3 .note.gnu.avr.deviceinfo 0000003c  00000000  00000000  00000184  2**2
                   CONTENTS, READONLY
-  4 .debug_aranges 00000020  00000000  00000000  000001dc  2**0
+  4 .debug_aranges 00000020  00000000  00000000  000001c0  2**0
                   CONTENTS, READONLY, DEBUGGING
-  5 .debug_info   00000721  00000000  00000000  000001fc  2**0
+  5 .debug_info   000006d9  00000000  00000000  000001e0  2**0
                   CONTENTS, READONLY, DEBUGGING
-  6 .debug_abbrev 000005a9  00000000  00000000  0000091d  2**0
+  6 .debug_abbrev 00000575  00000000  00000000  000008b9  2**0
                   CONTENTS, READONLY, DEBUGGING
-  7 .debug_line   000002bf  00000000  00000000  00000ec6  2**0
+  7 .debug_line   0000030a  00000000  00000000  00000e2e  2**0
                   CONTENTS, READONLY, DEBUGGING
-  8 .debug_frame  00000024  00000000  00000000  00001188  2**2
+  8 .debug_frame  00000024  00000000  00000000  00001138  2**2
                   CONTENTS, READONLY, DEBUGGING
-  9 .debug_str    000003ba  00000000  00000000  000011ac  2**0
+  9 .debug_str    000003d0  00000000  00000000  0000115c  2**0
                   CONTENTS, READONLY, DEBUGGING
- 10 .debug_loc    0000013b  00000000  00000000  00001566  2**0
+ 10 .debug_loc    000000bf  00000000  00000000  0000152c  2**0
                   CONTENTS, READONLY, DEBUGGING
- 11 .debug_ranges 00000010  00000000  00000000  000016a1  2**0
+ 11 .debug_ranges 00000010  00000000  00000000  000015eb  2**0
                   CONTENTS, READONLY, DEBUGGING
 
 Disassembly of section .text:
@@ -61,7 +61,7 @@ Disassembly of section .text:
   5c:	de bf       	out	0x3e, r29	; 62
   5e:	cd bf       	out	0x3d, r28	; 61
   60:	0e 94 36 00 	call	0x6c	; 0x6c <main>
-  64:	0c 94 8b 00 	jmp	0x116	; 0x116 <_exit>
+  64:	0c 94 7d 00 	jmp	0xfa	; 0xfa <_exit>
 
 00000068 <__bad_interrupt>:
   68:	0c 94 00 00 	jmp	0	; 0x0 <__vectors>
@@ -78,12 +78,11 @@ int main(void)
   6e:	b8 98       	cbi	0x17, 0	; 23
 	 PORTB = PORTB | (1<<PB0); /* Enable pull-up on PB2 by writing 1 to it */
   70:	c0 9a       	sbi	0x18, 0	; 24
-	 int pin_status;
+	 int pin0_status;
 	
      DDRD = 0xFF;
   72:	8f ef       	ldi	r24, 0xFF	; 255
   74:	81 bb       	out	0x11, r24	; 17
-	 
 	
 	 // FOR THE SECOND LED
 	  int number = DDRC | (1<<PC1);
@@ -125,150 +124,101 @@ int main(void)
 	   int number8 = PORTB | (1<<PB3);
 	   PORTB = number8;
   92:	c3 9a       	sbi	0x18, 3	; 24
-		int secondpin;
-		int thirdpin;
+		 pin3_status = ~ PINB & (1<<PB3);
+		 counter =counter + 1;
+		 res[counter] = (pin3_status)? (PORTC | (1<<PC3) ):(PORTC & (~(1<<PC3)));  
+		  PORTC = res[counter]; 
+	
+	      DDRD = 0xFF;
+  94:	2f ef       	ldi	r18, 0xFF	; 255
 		int fourthpin;
+		int res[4];
 		// FIRST LED 
-		  pin_status = ~PINB & (1<<PB0); /*Read status of pin PB2 */
-		  if(pin_status) /* Transmit status of pin PB2 on to pin PB3 to drive LED.*/
-  94:	b0 99       	sbic	0x16, 0	; 22
-  96:	02 c0       	rjmp	.+4      	; 0x9c <main+0x30>
-		  {
-			   firstpin =PORTC | (1<<PC0);
-			  PORTC = firstpin; 
-  98:	a8 9a       	sbi	0x15, 0	; 21
-  9a:	04 c0       	rjmp	.+8      	; 0xa4 <main+0x38>
-			//  PORTC = PORTC | (1<<PC0); /*Switch is open, pin_status = 1, LED is ON */
-		  }
-		  else
-		  {
-			  firstpin = PORTC & (~(1<<PC0));
-  9c:	85 b3       	in	r24, 0x15	; 21
-			  PORTC = firstpin; /*Switch is closed, pin_status = 0, LED is OFF */
-  9e:	90 e0       	ldi	r25, 0x00	; 0
-  a0:	8e 7f       	andi	r24, 0xFE	; 254
-  a2:	85 bb       	out	0x15, r24	; 21
-		  }
+		int counter = 0;
+		  pin0_status = ~PINB & (1<<PB0); /*Read status of pin PB2 */
+		   res[counter] = (pin0_status)? (PORTC |(1<<PC0) ):(PORTC & (~(1<<PC0))); 
+  96:	b0 99       	sbic	0x16, 0	; 22
+  98:	03 c0       	rjmp	.+6      	; 0xa0 <main+0x34>
+  9a:	85 b3       	in	r24, 0x15	; 21
+  9c:	81 60       	ori	r24, 0x01	; 1
+  9e:	03 c0       	rjmp	.+6      	; 0xa6 <main+0x3a>
+  a0:	85 b3       	in	r24, 0x15	; 21
+  a2:	90 e0       	ldi	r25, 0x00	; 0
+  a4:	8e 7f       	andi	r24, 0xFE	; 254
+		   PORTC = res[counter];  
+  a6:	85 bb       	out	0x15, r24	; 21
 		  
 		   // SECOND LED
 		 pin1_status = ~PINB & (1<<PB1);
-  a4:	86 b3       	in	r24, 0x16	; 22
-		 if(pin1_status)
-  a6:	90 e0       	ldi	r25, 0x00	; 0
-  a8:	80 95       	com	r24
-  aa:	90 95       	com	r25
-  ac:	81 ff       	sbrs	r24, 1
-  ae:	02 c0       	rjmp	.+4      	; 0xb4 <main+0x48>
-		  {
-			  
-			 secondpin = PORTC | (1<<PC1);
-			 PORTC = secondpin;
-  b0:	a9 9a       	sbi	0x15, 1	; 21
-  b2:	04 c0       	rjmp	.+8      	; 0xbc <main+0x50>
-		  }
-		  else
-		  {
-			  secondpin = PORTC & (~(1<<PC1));
+  a8:	86 b3       	in	r24, 0x16	; 22
+		 counter =counter+1;
+		  res [counter] = (pin1_status)? (PORTC |(1<<PC1) ):(PORTC & (~(1<<PC1))) ;  
+  aa:	90 e0       	ldi	r25, 0x00	; 0
+  ac:	80 95       	com	r24
+  ae:	90 95       	com	r25
+  b0:	81 ff       	sbrs	r24, 1
+  b2:	03 c0       	rjmp	.+6      	; 0xba <main+0x4e>
   b4:	85 b3       	in	r24, 0x15	; 21
-			  PORTC = secondpin;
-  b6:	90 e0       	ldi	r25, 0x00	; 0
-  b8:	8d 7f       	andi	r24, 0xFD	; 253
-  ba:	85 bb       	out	0x15, r24	; 21
-		  }
+  b6:	82 60       	ori	r24, 0x02	; 2
+  b8:	03 c0       	rjmp	.+6      	; 0xc0 <main+0x54>
+  ba:	85 b3       	in	r24, 0x15	; 21
+  bc:	90 e0       	ldi	r25, 0x00	; 0
+  be:	8d 7f       	andi	r24, 0xFD	; 253
+		 PORTC = res [counter];
+  c0:	85 bb       	out	0x15, r24	; 21
+		
 		  
 		  // THIRD LED
 		 pin2_status = ~PINB & (1<<PB2);
-  bc:	86 b3       	in	r24, 0x16	; 22
-		 if(pin2_status)
-  be:	90 e0       	ldi	r25, 0x00	; 0
-  c0:	80 95       	com	r24
-  c2:	90 95       	com	r25
-  c4:	82 ff       	sbrs	r24, 2
-  c6:	02 c0       	rjmp	.+4      	; 0xcc <main+0x60>
-		 {
-			 //PORTC = PORTC  | (1<<PC2);|
-			 
-			 thirdpin = PORTC |(1<<PC2);
-			 PORTC = thirdpin;
-  c8:	aa 9a       	sbi	0x15, 2	; 21
-  ca:	04 c0       	rjmp	.+8      	; 0xd4 <main+0x68>
-		 }
-		 else
-		 {
-			 thirdpin = PORTC & (~(1<<PC2));
-  cc:	85 b3       	in	r24, 0x15	; 21
-			 PORTC = thirdpin;
-  ce:	90 e0       	ldi	r25, 0x00	; 0
-  d0:	8b 7f       	andi	r24, 0xFB	; 251
-  d2:	85 bb       	out	0x15, r24	; 21
-		 }
+  c2:	86 b3       	in	r24, 0x16	; 22
+		 counter = counter+1;
+		  res[counter] = (pin2_status)? (PORTC |(1<<PC2) ):(PORTC & (~(1<<PC2))) ;  
+  c4:	90 e0       	ldi	r25, 0x00	; 0
+  c6:	80 95       	com	r24
+  c8:	90 95       	com	r25
+  ca:	82 ff       	sbrs	r24, 2
+  cc:	03 c0       	rjmp	.+6      	; 0xd4 <main+0x68>
+  ce:	85 b3       	in	r24, 0x15	; 21
+  d0:	84 60       	ori	r24, 0x04	; 4
+  d2:	03 c0       	rjmp	.+6      	; 0xda <main+0x6e>
+  d4:	85 b3       	in	r24, 0x15	; 21
+  d6:	90 e0       	ldi	r25, 0x00	; 0
+  d8:	8b 7f       	andi	r24, 0xFB	; 251
+		 PORTC = res[counter];
+  da:	85 bb       	out	0x15, r24	; 21
+		
 		 
 		 // FOURTH LED 
 		 pin3_status = ~ PINB & (1<<PB3);
-  d4:	86 b3       	in	r24, 0x16	; 22
-		 if(pin3_status)
-  d6:	90 e0       	ldi	r25, 0x00	; 0
-  d8:	80 95       	com	r24
-  da:	90 95       	com	r25
-  dc:	83 ff       	sbrs	r24, 3
-  de:	02 c0       	rjmp	.+4      	; 0xe4 <main+0x78>
-		 {
-			 fourthpin = PORTC | (1<<PC3);
-			 PORTC = fourthpin;
-  e0:	ab 9a       	sbi	0x15, 3	; 21
-  e2:	04 c0       	rjmp	.+8      	; 0xec <main+0x80>
+  dc:	86 b3       	in	r24, 0x16	; 22
+		 counter =counter + 1;
+		 res[counter] = (pin3_status)? (PORTC | (1<<PC3) ):(PORTC & (~(1<<PC3)));  
+  de:	90 e0       	ldi	r25, 0x00	; 0
+  e0:	80 95       	com	r24
+  e2:	90 95       	com	r25
+  e4:	83 ff       	sbrs	r24, 3
+  e6:	03 c0       	rjmp	.+6      	; 0xee <main+0x82>
+  e8:	85 b3       	in	r24, 0x15	; 21
+  ea:	88 60       	ori	r24, 0x08	; 8
+  ec:	03 c0       	rjmp	.+6      	; 0xf4 <main+0x88>
+  ee:	85 b3       	in	r24, 0x15	; 21
+  f0:	90 e0       	ldi	r25, 0x00	; 0
+  f2:	87 7f       	andi	r24, 0xF7	; 247
+		  PORTC = res[counter]; 
+  f4:	85 bb       	out	0x15, r24	; 21
+	
+	      DDRD = 0xFF;
+  f6:	21 bb       	out	0x11, r18	; 17
+					   _delay_ms(500);
+				   }
+			   }
 		 }
-		 else
-		 {
-			 
-			 fourthpin = PORTC & (~(1<<PC3));
-  e4:	85 b3       	in	r24, 0x15	; 21
-			 PORTC = fourthpin;
-  e6:	90 e0       	ldi	r25, 0x00	; 0
-  e8:	87 7f       	andi	r24, 0xF7	; 247
-  ea:	85 bb       	out	0x15, r24	; 21
-		 }
-		 
-		 
-		 int pinD_status;
-		 
-		 pinD_status = PIND;
-  ec:	80 b3       	in	r24, 0x10	; 16
-	#else
-		//round up by default
-		__ticks_dc = (uint32_t)(ceil(fabs(__tmp)));
-	#endif
+		
+    }
+  f8:	ce cf       	rjmp	.-100    	; 0x96 <main+0x2a>
 
-	__builtin_avr_delay_cycles(__ticks_dc);
-  ee:	2f ef       	ldi	r18, 0xFF	; 255
-  f0:	84 e3       	ldi	r24, 0x34	; 52
-  f2:	9c e0       	ldi	r25, 0x0C	; 12
-  f4:	21 50       	subi	r18, 0x01	; 1
-  f6:	80 40       	sbci	r24, 0x00	; 0
-  f8:	90 40       	sbci	r25, 0x00	; 0
-  fa:	e1 f7       	brne	.-8      	; 0xf4 <main+0x88>
-  fc:	00 c0       	rjmp	.+0      	; 0xfe <main+0x92>
-  fe:	00 00       	nop
-		//  }
-		  if(pinD_status = 11000000)
-		  {
-			    _delay_ms(500);
-			    //_delay_ms(500);
-			    PORTD = PORTD & (~(1<<PD0));
- 100:	90 98       	cbi	0x12, 0	; 18
- 102:	2f ef       	ldi	r18, 0xFF	; 255
- 104:	84 e3       	ldi	r24, 0x34	; 52
- 106:	9c e0       	ldi	r25, 0x0C	; 12
- 108:	21 50       	subi	r18, 0x01	; 1
- 10a:	80 40       	sbci	r24, 0x00	; 0
- 10c:	90 40       	sbci	r25, 0x00	; 0
- 10e:	e1 f7       	brne	.-8      	; 0x108 <main+0x9c>
- 110:	00 c0       	rjmp	.+0      	; 0x112 <main+0xa6>
- 112:	00 00       	nop
- 114:	bf cf       	rjmp	.-130    	; 0x94 <main+0x28>
+000000fa <_exit>:
+  fa:	f8 94       	cli
 
-00000116 <_exit>:
- 116:	f8 94       	cli
-
-00000118 <__stop_program>:
- 118:	ff cf       	rjmp	.-2      	; 0x118 <__stop_program>
+000000fc <__stop_program>:
+  fc:	ff cf       	rjmp	.-2      	; 0xfc <__stop_program>

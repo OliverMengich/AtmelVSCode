@@ -16,10 +16,9 @@ int main(void)
 	 DDRC = DDRC | (1<<PC0); /* Make PB3 as output pin */
 	 DDRB = DDRB & (~(1<<PB0)); /* Make PB2 as input pin */
 	 PORTB = PORTB | (1<<PB0); /* Enable pull-up on PB2 by writing 1 to it */
-	 int pin_status;
+	 int pin0_status;
 	
      DDRD = 0xFF;
-	 
 	
 	 // FOR THE SECOND LED
 	  int number = DDRC | (1<<PC1);
@@ -48,6 +47,7 @@ int main(void)
 	   PORTB = number8;
 	   int pin3_status;
 	   
+	   
     /* Replace with your application code */
     while (1) 
     {
@@ -55,94 +55,56 @@ int main(void)
 		int secondpin;
 		int thirdpin;
 		int fourthpin;
+		int res[4];
 		// FIRST LED 
-		  pin_status = ~PINB & (1<<PB0); /*Read status of pin PB2 */
-		  if(pin_status) /* Transmit status of pin PB2 on to pin PB3 to drive LED.*/
-		  {
-			   firstpin =PORTC | (1<<PC0);
-			  PORTC = firstpin; 
-			//  PORTC = PORTC | (1<<PC0); /*Switch is open, pin_status = 1, LED is ON */
-		  }
-		  else
-		  {
-			  firstpin = PORTC & (~(1<<PC0));
-			  PORTC = firstpin; /*Switch is closed, pin_status = 0, LED is OFF */
-		  }
+		int counter = 0;
+		  pin0_status = ~PINB & (1<<PB0); /*Read status of pin PB2 */
+		   res[counter] = (pin0_status)? (PORTC |(1<<PC0) ):(PORTC & (~(1<<PC0))); 
+		   PORTC = res[counter];  
 		  
 		   // SECOND LED
 		 pin1_status = ~PINB & (1<<PB1);
-		 if(pin1_status)
-		  {
-			  
-			 secondpin = PORTC | (1<<PC1);
-			 PORTC = secondpin;
-		  }
-		  else
-		  {
-			  secondpin = PORTC & (~(1<<PC1));
-			  PORTC = secondpin;
-		  }
+		 counter =counter+1;
+		  res [counter] = (pin1_status)? (PORTC |(1<<PC1) ):(PORTC & (~(1<<PC1))) ;  
+		 PORTC = res [counter];
+		
 		  
 		  // THIRD LED
 		 pin2_status = ~PINB & (1<<PB2);
-		 if(pin2_status)
-		 {
-			 //PORTC = PORTC  | (1<<PC2);|
-			 
-			 thirdpin = PORTC |(1<<PC2);
-			 PORTC = thirdpin;
-		 }
-		 else
-		 {
-			 thirdpin = PORTC & (~(1<<PC2));
-			 PORTC = thirdpin;
-		 }
+		 counter = counter+1;
+		  res[counter] = (pin2_status)? (PORTC |(1<<PC2) ):(PORTC & (~(1<<PC2))) ;  
+		 PORTC = res[counter];
+		
 		 
 		 // FOURTH LED 
 		 pin3_status = ~ PINB & (1<<PB3);
-		 if(pin3_status)
+		 counter =counter + 1;
+		 res[counter] = (pin3_status)? (PORTC | (1<<PC3) ):(PORTC & (~(1<<PC3)));  
+		  PORTC = res[counter]; 
+	
+	      DDRD = 0xFF;
+	       int passwordcorrect [4] = {res[0], res[1], res[2],res[3]};
+		 if(counter == 4)
 		 {
-			 fourthpin = PORTC | (1<<PC3);
-			 PORTC = fourthpin;
+			  for(int i = 0; i<4;i++)
+			  {
+				   if(res[i] == passwordcorrect[4])
+				   {
+					   PORTD = PORTD | (1<<PD0);
+					   _delay_ms(500);
+					   PORTD = PORTD & (~(1<<PD0));
+					   _delay_ms(500);
+				   }
+				   else
+				   {
+					   PORTD = PORTD | (1<<PD1);
+					   _delay_ms(500);
+					   PORTD = PORTD & (~(1<<PD1));
+					   _delay_ms(500);
+				   }
+			   }
 		 }
-		 else
-		 {
-			 
-			 fourthpin = PORTC & (~(1<<PC3));
-			 PORTC = fourthpin;
-		 }
-		 
-		 
-		 int pinD_status;
-		 
-		 pinD_status = PIND;
-		  
-		//  if(fourthpin + thirdpin + secondpin + firstpin)
-		  //{
-			// PORTD = PORTD | (1<<PD0);
-			// _delay_ms(500);
-			//_delay_ms(500);
-			 //PORTD = PORTD & (~(1<<PD0));
-			 //_delay_ms(500);  
-			// break;
-		//  }
-		  if(pinD_status = 11000000)
-		  {
-			    _delay_ms(500);
-			    //_delay_ms(500);
-			    PORTD = PORTD & (~(1<<PD0));
-			    _delay_ms(500);
-			    // break;
-			  
-		  }
-		//  if(!(fourthpin + thirdpin + secondpin + firstpin))
-		  //{
-			//  PORTD = PORTD | (1<<PD1);
-			  //_delay_ms(500);
-			//  PORTD = PORTD & (~(1<<PD1));
-			//  _delay_ms(500);
-			//  break;
-		  //}
+		
     }
 	return 0;
 }
